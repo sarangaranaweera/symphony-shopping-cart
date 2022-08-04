@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
@@ -27,16 +28,14 @@ class Order
     #[ORM\Column(type: 'datetime')]
     private $updated_at;
 
-    /**
-     * Many Orders have Many Products.
-     * @ManyToMany(targetEntity="Product", mappedBy="products")
-     */
+    #[ORM\OneToMany(mappedBy: '_order', targetEntity: ProductOrder::class)]
     private $products;
 
     public function __construct()
     {
         $this->products = new ArrayCollection();
     }
+
 
     public function getId(): ?int
     {
@@ -87,6 +86,36 @@ class Order
     public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ProductOrder>
+     */
+    public function getProducts(): Collection
+    {
+        return $this->products;
+    }
+
+    public function addProduct(ProductOrder $product): self
+    {
+        if (!$this->products->contains($product)) {
+            $this->products[] = $product;
+            $product->setOrder($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(ProductOrder $product): self
+    {
+        if ($this->products->removeElement($product)) {
+            // set the owning side to null (unless already changed)
+            if ($product->getOrder() === $this) {
+                $product->setOrder(null);
+            }
+        }
 
         return $this;
     }

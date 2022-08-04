@@ -30,11 +30,7 @@ class Product
     #[ORM\Column(type: 'integer')]
     private $quantity;
 
-    /**
-     * Many Products have Many Orders.
-     * @ManyToMany(targetEntity="Order", inversedBy="products")
-     * @JoinTable(name="order_product")
-     */
+    #[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductOrder::class)]
     private $orders;
 
     public function __construct()
